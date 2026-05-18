@@ -186,3 +186,56 @@ docker images
 - 如何設計 CD Pipeline 部署到目標環境
 - CI Pipeline 與 CD Pipeline 的相依關係
 - 通知或報表機制
+
+---
+
+## 課堂作業繳交說明
+
+### 已建立的 CI workflow
+
+- 檔案：`.github/workflows/ci_b11705058.yaml`
+- 觸發：push 到任何 branch、pull request、手動 `workflow_dispatch`
+- 三項必要檢查：
+  1. `npm run typecheck` — TypeScript 型別檢查
+  2. `npm run format:check` — Prettier 程式碼格式檢查
+  3. `npm test` — vitest 單元測試（同時輸出 JUnit XML 報告）
+- 測試結果展示：
+  - JUnit XML 透過 `actions/upload-artifact` 上傳為 `vitest-test-report`，可在該次 run 頁面下載
+  - 用 `$GITHUB_STEP_SUMMARY` 在 Actions Summary 區塊印出 markdown 表格（Total / Failures / Errors / Skipped）
+
+### 在本機驗證
+
+```bash
+npm ci
+npm run typecheck
+npm run format:check
+npm test
+```
+
+三項都要綠燈才會在 GitHub Actions 上通過。
+
+### 示範失敗 case（報告需要用到）
+
+任選一種製造失敗：
+
+**A. 型別錯誤（typecheck fail）**
+
+把 `src/app.ts` 隨便加一行像 `const x: number = 'hello';`，push 即可看到 `TypeScript typecheck` step 變紅。
+
+**B. 格式錯誤（prettier fail）**
+
+把 `src/app.ts` 內某行的單引號改成雙引號、或亂加 tab，push 後 `Prettier format check` step 會紅。
+
+**C. 單元測試失敗**
+
+把 `test/app.test.ts` 內的 `expect(response.statusCode).toBe(200)` 改成 `toBe(500)`，push 後 `Run unit tests` step 會紅。
+
+> **記得截圖完一定要 revert！** 不然下次 push 還是 fail。
+
+### 繳交清單
+
+- [ ] 改名 workflow 檔成 `ci_{學號}.yaml`
+- [ ] Push 到 fork 的 GitHub repo
+- [ ] 截圖：成功的一次 run（Actions 頁面 + 三個 step 都打勾）
+- [ ] 截圖：失敗的一次 run（紅色 X + log 顯示錯在哪）
+- [ ] PDF 報告：`學號_姓名_CICD_作業.pdf`，含 pipeline 說明、yaml 內容、成功截圖、失敗截圖 + 錯因分析
